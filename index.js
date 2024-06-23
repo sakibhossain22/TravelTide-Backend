@@ -31,6 +31,7 @@ async function run() {
         await client.connect();
         const hotelsCollection = client.db('TravelTide').collection('hotels')
         const desCollection = client.db('TravelTide').collection('destinations')
+        const cartCollection = client.db('TravelTide').collection('cart')
 
         // Verify Token
         const verifyToken = (req, res, next) => {
@@ -67,12 +68,33 @@ async function run() {
                 res.status(500).send({ message: 'Internal Server Error' });
             }
         });
+        // Get All Cart By User
+        app.get('/cart/:email', async (req, res) => {
+            const { email } = req.params
+            const query = { user: email }
+            const results = await cartCollection.find(query).toArray()
+            res.send(results)
+        })
+        app.delete('/cart/:id', async (req, res) => {
+            try {
+                const { id } = req.params;
+                console.log(id);
+                const query = { _id: new ObjectId(id) }
+                const result = await cartCollection.deleteOne(query)
+                console.log(result);
+                res.send(result)
+
+            } catch (err) {
+                res.status(500).send({ message: 'Internal Server Error' });
+            }
+        });
+
         // Single Hotel Details
         app.get('/hotel/:uniqueId', async (req, res) => {
             try {
-                const {uniqueId} = req.params
-                const query = {uniqueId : uniqueId}
-                const hotel  = await hotelsCollection.findOne(query)
+                const { uniqueId } = req.params
+                const query = { uniqueId: uniqueId }
+                const hotel = await hotelsCollection.findOne(query)
                 res.send(hotel)
             } catch (err) {
                 res.status(500).send({ message: 'Internal Server Error' });
@@ -86,6 +108,28 @@ async function run() {
                 res.status(500).send({ message: 'Internal Server Error' });
             }
         });
+        // Cart Post 
+        app.post('/cart', async (req, res) => {
+            try {
+                const newData = req.body; // Get the new data from the request body
+                if (newData) {
+                    // Check if the item already exists in the collection
+                    const cartItem = await cartCollection.findOne({ _id: newData._id });
+                    if (cartItem) {
+                        res.status(400).send({ message: 'You have already added this item.' });
+                    } else {
+                        // Insert the new data into the collection
+                        const postData = await cartCollection.insertOne(newData);
+                        res.status(201).send(postData);
+                    }
+                } else {
+                    res.status(400).send({ message: 'Invalid data received.' });
+                }
+            } catch (err) {
+                res.status(500).send({ message: 'Internal Server Error' });
+            }
+        });
+
         // JWT
         app.post('/jwt', (req, res) => {
             const user = req.body
@@ -106,6 +150,6 @@ run().catch(console.dir);
 
 
 app.get('/', (req, res) => {
-    res.send('Boss Is Waiting')
+    res.send('Travel Tide Is Waiting')
 })
-app.listen(port, console.log('bistro boss is running'))
+app.listen(port, console.log('Travel Tide Boss is running'))
