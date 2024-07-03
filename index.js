@@ -4,6 +4,7 @@ const cors = require('cors');
 const app = express()
 const port = process.env.PORT | 5000
 let jwt = require('jsonwebtoken');
+const ACCESS_TOKEN = '3ede879e106f08b718b555805a2f2eab2faeb8ec8c96700b7e4fb6c8ac6b029c50afe63cdb2631ff94dc92c43631c35183b65b621bfb54a73d5308b1fa5d2b8b'
 const stripe = require("stripe")('sk_test_51NgMf2SJZsIhUwm5TWFi9g4SrqXCK64lm6uRTaywDhymkuX5Umy9WaPjs5DqZwFSo6h8KMzLhXKBwRpzJKUfUpdF00wrja3qm3');
 
 // middleWare
@@ -14,7 +15,7 @@ app.use(cors({
 app.use(express.json())
 require('dotenv').config()
 // mongodb
-const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.60qibw3.mongodb.net/?retryWrites=true&w=majority`;
+const uri = `mongodb+srv://sakib01181:Sakib_22@cluster0.60qibw3.mongodb.net/?retryWrites=true&w=majority`;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
@@ -39,7 +40,7 @@ async function run() {
                 return res.status(401).send({ message: 'Forbidden access' })
             }
             const token = req?.headers?.authorization?.split(' ')[1]
-            const verify = jwt.verify(token, process.env.ACCESS_TOKEN, (err, decoded) => {
+            const verify = jwt.verify(token,ACCESS_TOKEN, (err, decoded) => {
                 if (err) {
                     return res.status(401).send({ message: 'Forbidden access' })
                 }
