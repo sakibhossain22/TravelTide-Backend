@@ -2,9 +2,9 @@ const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const express = require('express');
 const cors = require('cors');
 const app = express()
-const port = process.env.PORT | 5000
+const port = process.env.PORT || 5000
 let jwt = require('jsonwebtoken');
-const ACCESS_TOKEN = '3ede879e106f08b718b555805a2f2eab2faeb8ec8c96700b7e4fb6c8ac6b029c50afe63cdb2631ff94dc92c43631c35183b65b621bfb54a73d5308b1fa5d2b8b'
+// const ACCESS_TOKEN = '3ede879e106f08b718b555805a2f2eab2faeb8ec8c96700b7e4fb6c8ac6b029c50afe63cdb2631ff94dc92c43631c35183b65b621bfb54a73d5308b1fa5d2b8b'
 const stripe = require("stripe")('sk_test_51NgMf2SJZsIhUwm5TWFi9g4SrqXCK64lm6uRTaywDhymkuX5Umy9WaPjs5DqZwFSo6h8KMzLhXKBwRpzJKUfUpdF00wrja3qm3');
 
 // middleWare
@@ -40,26 +40,26 @@ async function run() {
                 return res.status(401).send({ message: 'Forbidden access' })
             }
             const token = req?.headers?.authorization?.split(' ')[1]
-            const verify = jwt.verify(token,ACCESS_TOKEN, (err, decoded) => {
-                if (err) {
-                    return res.status(401).send({ message: 'Forbidden access' })
-                }
-                req.decoded = decoded
-                next()
-            })
+            // const verify = jwt.verify(token,ACCESS_TOKEN, (err, decoded) => {
+            //     if (err) {
+            //         return res.status(401).send({ message: 'Forbidden access' })
+            //     }
+            //     req.decoded = decoded
+            //     next()
+            // })
         }
         // VerIfy Admin
-        const verifyAdmin = async (req, res, next) => {
-            const email = req.decoded.email
-            const query = { email: email }
-            const user = await userCollection.findOne(query)
-            const isAdmin = user?.role === 'admin'
-            if (!isAdmin) {
-                return res.status(403).send({ message: 'forbidden access' })
-            }
-            next()
+        // const verifyAdmin = async (req, res, next) => {
+        //     const email = req.decoded.email
+        //     const query = { email: email }
+        //     const user = await userCollection.findOne(query)
+        //     const isAdmin = user?.role === 'admin'
+        //     if (!isAdmin) {
+        //         return res.status(403).send({ message: 'forbidden access' })
+        //     }
+        //     next()
 
-        }
+        // }
         // Get Hotels
         app.get('/hotels', async (req, res) => {
             try {
@@ -79,10 +79,8 @@ async function run() {
         app.delete('/cart/:id', async (req, res) => {
             try {
                 const { id } = req.params;
-                console.log(id);
-                const query = { _id: new ObjectId(id) }
+                const query = { _id: id }
                 const result = await cartCollection.deleteOne(query)
-                console.log(result);
                 res.send(result)
 
             } catch (err) {
@@ -132,11 +130,11 @@ async function run() {
         });
 
         // JWT
-        app.post('/jwt', (req, res) => {
-            const user = req.body
-            const token = jwt.sign(user, process.env.ACCESS_TOKEN, { expiresIn: '1h' })
-            res.send({ token })
-        })
+        // app.post('/jwt', (req, res) => {
+        //     const user = req.body
+        //     const token = jwt.sign(user, process.env.ACCESS_TOKEN, { expiresIn: '1h' })
+        //     res.send({ token })
+        // })
 
 
         // Send a ping to confirm a successful connection
